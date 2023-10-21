@@ -38,7 +38,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('products/:name', async (req, res) => {
+    app.get('/products/:name', async (req, res) => {
       const brand = req.params.name.toLowerCase()
       const query = { brand: brand }
       const result = await productCollection.find(query).toArray()
@@ -54,6 +54,13 @@ async function run() {
 
     app.get('/myCart', async (req, res) => {
       const result = await myCartCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.delete('/products/:id',async(req,res)=> {
+      const id =req.params.id;
+      const query = {_id:id}
+      const result = await myCartCollection.deleteOne(query)
       res.send(result)
     })
 
