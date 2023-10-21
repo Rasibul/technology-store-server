@@ -1,7 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
@@ -29,21 +29,33 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db('productDB').collection("product")
+    const myCartCollection = client.db('myCartDB').collection("myCart")
 
     app.post('/products', async (req, res) => {
       const product = req.body
       console.log(product)
       const result = await productCollection.insertOne(product)
       res.send(result)
-  })
+    })
 
-  app.get('/:name', async (req, res) => {
-    const brand = req.params.name.toLowerCase()
-    const query = { brand: brand }
-    const result = await productCollection.find(query).toArray()
-    res.send(result)
-})
+    app.get('products/:name', async (req, res) => {
+      const brand = req.params.name.toLowerCase()
+      const query = { brand: brand }
+      const result = await productCollection.find(query).toArray()
+      res.send(result)
+    })
 
+    app.post('/myCart', async (req, res) => {
+      const product = req.body
+      console.log(product)
+      const result = await myCartCollection.insertOne(product)
+      res.send(result)
+    })
+
+    app.get('/myCart', async (req, res) => {
+      const result = await myCartCollection.find().toArray()
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
@@ -59,9 +71,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send("techonolgy surver is running")
+  res.send("techonolgy surver is running")
 })
 
 app.listen(port, () => {
-    console.log(`techonology Surver is Running${port}`)
+  console.log(`techonology Surver is Running${port}`)
 })
