@@ -31,6 +31,19 @@ async function run() {
     const productCollection = client.db('productDB').collection("product")
     const myCartCollection = client.db('myCartDB').collection("myCart")
 
+    app.get('/products',async(req,res)=>{
+      const cursor = productCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.get('/products/:id',async(req,res)=>{
+      const id = req.params.id
+      const query = {_id : new ObjectId(id)}
+      const product = await productCollection.findOne(query)
+      res.send(product)
+    })
+
     app.post('/products', async (req, res) => {
       const product = req.body
       console.log(product)
@@ -38,10 +51,36 @@ async function run() {
       res.send(result)
     })
 
+    app.put('/products/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true }
+      const updateProduct = req.body
+      const product = {
+        $set: {
+          name: updateProduct.name,
+          photo: updateProduct.photo,
+          type: updateProduct.type,
+          brand: updateProduct.brand,
+          ratting: updateProduct.ratting,
+          price: updateProduct.price
+        }
+      }
+      const result = await productCollection.updateOne(filter, product, options)
+      res.send(result)
+    })
+
     app.get('/products/:name', async (req, res) => {
       const brand = req.params.name.toLowerCase()
       const query = { brand: brand }
       const result = await productCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.findOne(query)
       res.send(result)
     })
 
@@ -57,9 +96,9 @@ async function run() {
       res.send(result)
     })
 
-    app.delete('/products/:id',async(req,res)=> {
-      const id =req.params.id;
-      const query = {_id:id}
+    app.delete('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: id }
       const result = await myCartCollection.deleteOne(query)
       res.send(result)
     })
