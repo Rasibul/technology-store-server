@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const productCollection = client.db('productDB').collection("product")
     const myCartCollection = client.db('myCartDB').collection("myCart")
@@ -70,42 +70,30 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/products/:name', async (req, res) => {
-      const brand = req.params.name.toLowerCase()
-      const query = { brand: brand }
-      const result = await productCollection.find(query).toArray()
-      res.send(result)
-    })
-
-    app.get('/products/:id', async (req, res) => {
-      const id = req.params.id
-      const query = { _id: new ObjectId(id) }
-      const result = await productCollection.findOne(query)
-      res.send(result)
-    })
-
-    app.post('/myCart', async (req, res) => {
-      const product = req.body
-      console.log(product)
-      const result = await myCartCollection.insertOne(product)
-      res.send(result)
-    })
 
     app.get('/myCart', async (req, res) => {
       const result = await myCartCollection.find().toArray()
       res.send(result)
     })
 
-    app.delete('/products/:id', async (req, res) => {
+    app.post('/myCart', async (req, res) => {
+      const product = req.body
+      product.productId = product._id
+      delete product._id
+      const result = await myCartCollection.insertOne(product)
+      res.send(result)
+    })
+
+    app.delete('/myCart/:id', async (req, res) => {
       const id = req.params.id;
-      const query = { _id: id }
+      const query = { _id:new ObjectId(id)  }
       const result = await myCartCollection.deleteOne(query)
       res.send(result)
     })
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
